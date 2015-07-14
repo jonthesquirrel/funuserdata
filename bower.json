@@ -1,0 +1,16 @@
+{
+  "name": "funuserdata",
+  "version": "0.0.0",
+  "homepage": "https://github.com/jdh11235/funuserdata",
+  "authors": [
+    "Jonathan Herman <jdh11235@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
