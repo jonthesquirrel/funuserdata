@@ -17,8 +17,8 @@ kl.update = function(char) {
     kl.freq[char] = 1;
   }
 
-  kl.$log.innerHTML = JSON.stringify(kl.log);
-  kl.$freq.innerHTML = JSON.stringify(kl.freq);
+  kl.$log.innerHTML = JSON.stringify(kl.log, 1);
+  kl.$freq.innerHTML = JSON.stringify(kl.freq, 1);
 };
 
 kl.reset = function() {
