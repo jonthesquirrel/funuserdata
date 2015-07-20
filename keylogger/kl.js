@@ -1,3 +1,4 @@
+//keylogger
 var kl = {};
 
 kl.log = [];
@@ -10,23 +11,33 @@ kl.handler = function(event) {
 
 kl.update = function(char) {
   kl.log.push(char);
-
   if (kl.freq[char]) {
     kl.freq[char]++;
   } else {
     kl.freq[char] = 1;
   }
+  kl.display();
+};
 
-  kl.$log.innerHTML = JSON.stringify(kl.log);
-  kl.$freq.innerHTML = JSON.stringify(kl.freq);
+kl.display = function() {
+  kl.clear();
+  kl.$log.innerHTML = JSON.stringify(kl.log, 1);
+  for (key of Object.keys(kl.freq)) {
+    var elm = document.createElement('li');
+    elm.innerHTML = String(key) + ': ' + String(kl.freq[key]);
+    kl.$freq.appendChild(elm);
+  }
+};
+
+kl.clear = function() {
+  kl.$log.innerHTML = '';
+  kl.$freq.innerHTML = '';
 };
 
 kl.reset = function() {
   kl.log = [];
   kl.freq = {};
-
-  kl.$log.innerHTML = '';
-  kl.$freq.innerHTML = '';
+  kl.clear();
 };
 
 kl.init = function() {
