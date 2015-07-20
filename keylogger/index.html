@@ -6,15 +6,28 @@
 
   <title>keylogger - funuserdata</title>
 
+  <link rel="icon" href="../icon.png">
+
   <link rel="stylesheet" href="../bower_components/lemonade/css/lemonade.css">
   <link rel="stylesheet" href="../base.css">
   <link rel="stylesheet" href="special.css">
 
-  <script src="main.js"></script>
+  <script src="../bower_components/d3/d3.js"></script>
+  <script src="../polyfill.js"></script>
+  <script src="kl.js"></script>
 </head>
 <body>
 
-display graphs of character count in textarea and of all-time 
+display graphs of character count in textarea and of all-time
+
+<hr>
+
+<textarea id="input" placeholder="type here!" cols="80" rows="18" autofocus></textarea>
+
+<hr>
+
+log: <p id="log" class="code"></p>
+stats: <p id="stats" class="code"></p>
 
 </body>
 </html>
