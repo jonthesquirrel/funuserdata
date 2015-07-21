@@ -27,13 +27,28 @@ kl.prefs = {
   }
 };
 
-kl.handleInput = function(event) {
-  var char = String.fromCharCode(event.charCode);
-  _defer(function() {
-    kl.process(char);
-  });
+kl.handleChange = function(event) {
+  setTimeout(function() { //async
+    kl.data.input = kl.$input.value;
+    kl.saveData();
+  }, 0);
 };
-//TODO: add paste handler + iterator
+
+kl.handleKeypress = function(event) {
+  var char = String.fromCharCode(event.charCode);
+  setTimeout(function() { //async
+    kl.process(char);
+  }, 0);
+};
+
+kl.handlePaste = function(event) {
+  var text = event.clipboardData.getData('text');
+  setTimeout(function() { //async
+    for (char of text.split('')) {
+      kl.process(char);
+    }
+  }, 0);
+};
 
 kl.process = function(char) { //call this async for non-blocking input
   kl.data.log.push(char);
@@ -140,7 +155,10 @@ kl.init = function() {
     kl.prefs[key].update();
   }
 
-  kl.$input.addEventListener('keypress', kl.handleInput);
+  kl.$input.addEventListener('keypress', kl.handleKeypress);
+  kl.$input.addEventListener('paste', kl.handlePaste);
+  kl.$input.addEventListener('cut', kl.handleChange);
+  kl.$input.addEventListener('keyup', kl.handleChange);
 };
 
 window.addEventListener('load', kl.init);

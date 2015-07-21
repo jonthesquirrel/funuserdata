@@ -33,8 +33,3 @@ if (![].includes) {
     return false;
   };
 }
-
-//emulating underscore.js
-_defer = function(callback) {
-  setTimeout(callback, 0);
-};
