@@ -22,7 +22,9 @@ kl.update = function(char) {
 kl.display = function() {
   kl.clear();
   kl.$log.innerHTML = JSON.stringify(kl.log, 1);
-  for (key of Object.keys(kl.freq)) {
+  for (key of Object.keys(kl.freq).sort(function(a, b) {
+    return kl.freq[a] - kl.freq[b];
+  })) {
     var elm = document.createElement('li');
     elm.innerHTML = String(key) + ': ' + String(kl.freq[key]);
     kl.$freq.appendChild(elm);
