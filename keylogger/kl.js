@@ -22,11 +22,18 @@ kl.update = function(char) {
 kl.display = function() {
   kl.clear();
   kl.$log.innerHTML = JSON.stringify(kl.log, 1);
-  for (key of Object.keys(kl.freq).sort(function(a, b) {
-    return kl.freq[a] - kl.freq[b];
+  for (key of Object.keys(kl.freq).sort(function(aKey, bKey) {
+    var aVal = kl.freq[aKey], bVal = kl.freq[bKey];
+    if (aVal === bVal) {
+      return aKey.charCodeAt() - bKey.charCodeAt(); //unicode order
+    } else {
+      return bVal - aVal; //freq order
+    }
   })) {
     var elm = document.createElement('li');
-    elm.innerHTML = String(key) + ': ' + String(kl.freq[key]);
+    var val = String(key);
+    val = (val === ' ') ? 'space' : val;
+    elm.innerHTML = val + ': ' + String(kl.freq[key]);
     kl.$freq.appendChild(elm);
   }
 };
