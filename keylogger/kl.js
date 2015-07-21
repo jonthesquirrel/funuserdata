@@ -28,29 +28,33 @@ kl.prefs = {
 };
 
 kl.handleChange = function(event) {
-  setTimeout(function() { //async
-    kl.data.input = kl.$input.value;
-    kl.saveData();
-  }, 0);
+  kl.data.input = kl.$input.value;
+  kl.saveData();
 };
 
 kl.handleKeypress = function(event) {
   var char = String.fromCharCode(event.charCode);
-  setTimeout(function() { //async
-    kl.process(char);
-  }, 0);
+  kl.process(char);
 };
 
 kl.handlePaste = function(event) {
   var text = event.clipboardData.getData('text');
-  setTimeout(function() { //async
-    for (char of text.split('')) {
-      kl.process(char);
+  //solves UI freezing by deduplicating display updates
+  var chars = text.split('');
+  kl.data.log = kl.data.log.concat(chars);
+  for (char of chars) {
+    if (kl.data.freq[char]) {
+      kl.data.freq[char]++;
+    } else {
+      kl.data.freq[char] = 1;
     }
-  }, 0);
+  }
+  kl.updateDisplay();
+  kl.data.input = kl.$input.value;
+  kl.saveData();
 };
 
-kl.process = function(char) { //call this async for non-blocking input
+kl.process = function(char) {
   kl.data.log.push(char);
   if (kl.data.freq[char]) {
     kl.data.freq[char]++;
@@ -72,8 +76,8 @@ kl.updateInput = function() {
 };
 
 kl.updateDisplay = function() {
-  kl.clearDisplay();
-  kl.$log.innerHTML = JSON.stringify(kl.data.log, 1);
+  kl.$log.innerHTML = JSON.stringify(kl.data.log, null, ' ');
+  kl.$freq.innerHTML = '';
   for (key of Object.keys(kl.data.freq).sort(function(aKey, bKey) {
     var aVal = kl.data.freq[aKey], bVal = kl.data.freq[bKey];
     if (aVal === bVal || (kl.getPref('sortFreq') === 'char')) { //pref override
@@ -89,11 +93,6 @@ kl.updateDisplay = function() {
     elm.innerHTML = val + ': ' + String(kl.data.freq[key]);
     kl.$freq.appendChild(elm);
   }
-};
-
-kl.clearDisplay = function() {
-  kl.$log.innerHTML = '';
-  kl.$freq.innerHTML = '';
 };
 
 kl.resetData = function() {
