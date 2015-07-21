@@ -23,7 +23,7 @@
   <br>
 
   <i>(data is not sent or stored outside your client)</i>
-  <button onclick="kl.reset()">reset data</button>
+  <button onclick="kl.resetData()">reset data</button>
 
   <hr>
 
@@ -32,12 +32,15 @@
   <hr>
 
   log:
-    <p id="log" class="code">[]</p>
 
-  frequency: (<i>sorted in order of: <span id="sortFreq" class="code"></span></i>
-    <button onclick="kl.setPref('sortFreq', 'freq')">change to freq</button>
-    <button onclick="kl.setPref('sortFreq', 'char')">change to char</button>)
-      <ul id="freq" class="code"></ul>
+  <p id="log" class="code">[]</p>
+
+  character frequency: (<i>sorted: <span id="sortFreq" class="code"></span></i>)
+  <br>
+  <button onclick="kl.setPref('sortFreq', 'freq')">frequency</button> /
+  <button onclick="kl.setPref('sortFreq', 'char')">alphabetically</button>
+
+  <ul id="freq" class="code"></ul>
 
   <hr>
 

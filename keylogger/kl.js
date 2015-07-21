@@ -1,79 +1,127 @@
 //keylogger
 var kl = {};
 
-kl.log = [];
-kl.freq = {};
+kl.dataTemplate = {
+  log: [],
+  freq: {},
+  input: ''
+};
+
+kl.data = {};
 
 kl.prefs = {
   sortFreq: {
     default: 'freq',
     options: ['freq', 'char'],
+    names: {
+      freq: 'by frequency',
+      char: 'alphabetically'
+    },
     isValid: function(val) {
       return kl.prefs.sortFreq.options.includes(val);
     },
     update: function() {
-      kl.$sortFreq.innerHTML = kl.getPref('sortFreq');
-      kl.display();
+      kl.$sortFreq.innerHTML = kl.getPref('sortFreq', true);
+      kl.updateDisplay();
     }
   }
 };
 
-kl.handler = function(event) {
+kl.handleInput = function(event) {
   var char = String.fromCharCode(event.charCode);
-  kl.update(char);
+  _defer(function() {
+    kl.process(char);
+  });
 };
+//TODO: add paste handler + iterator
 
-kl.update = function(char) {
-  kl.log.push(char);
-  if (kl.freq[char]) {
-    kl.freq[char]++;
+kl.process = function(char) { //call this async for non-blocking input
+  kl.data.log.push(char);
+  if (kl.data.freq[char]) {
+    kl.data.freq[char]++;
   } else {
-    kl.freq[char] = 1;
+    kl.data.freq[char] = 1;
   }
-  kl.display();
+  kl.updateDisplay();
+  kl.data.input = kl.$input.value;
+  kl.saveData();
 };
 
-kl.display = function() {
-  kl.clear();
-  kl.$log.innerHTML = JSON.stringify(kl.log, 1);
-  for (key of Object.keys(kl.freq).sort(function(aKey, bKey) {
-    var aVal = kl.freq[aKey], bVal = kl.freq[bKey];
+kl.updateAll = function() {
+  kl.updateInput();
+  kl.updateDisplay();
+};
+
+kl.updateInput = function() {
+  kl.$input.value = kl.data.input;
+};
+
+kl.updateDisplay = function() {
+  kl.clearDisplay();
+  kl.$log.innerHTML = JSON.stringify(kl.data.log, 1);
+  for (key of Object.keys(kl.data.freq).sort(function(aKey, bKey) {
+    var aVal = kl.data.freq[aKey], bVal = kl.data.freq[bKey];
     if (aVal === bVal || (kl.getPref('sortFreq') === 'char')) { //pref override
-      return aKey.charCodeAt() - bKey.charCodeAt(); //unicode order
+      return aKey.charCodeAt() - bKey.charCodeAt(); //(unicode) char order
     } else {
       return bVal - aVal; //freq order
     }
   })) {
     var elm = document.createElement('li');
     var val = String(key);
-    val = (val === ' ') ? 'space' : val; //replace space char with "space"
-    elm.innerHTML = val + ': ' + String(kl.freq[key]);
+    val = (val === ' ') ? 'space' : val; //replace space chars
+    val = (val === '\n' || val === '\r') ? 'return' : val;
+    elm.innerHTML = val + ': ' + String(kl.data.freq[key]);
     kl.$freq.appendChild(elm);
   }
 };
 
-kl.clear = function() {
-  kl.$log.innerHTML = '[]';
+kl.clearDisplay = function() {
+  kl.$log.innerHTML = '';
   kl.$freq.innerHTML = '';
 };
 
-kl.reset = function() {
-  kl.log = [];
-  kl.freq = {};
-  kl.clear();
+kl.resetData = function() {
+  kl.saveData(kl.dataTemplate);
+  kl.loadData();
 };
 
-kl.getPref = function(key) {
-  return localStorage.getItem('KL' + key);
+kl.getPref = function(key, displayName) { //get pref value or name
+  var val = localStorage.getItem('kl_pref_' + key);
+  if (displayName) {
+    return kl.prefs[key].names[val];
+  } else {
+    return val;
+  }
 };
 
 kl.setPref = function(key, val) {
   if (kl.prefs[key].isValid(val)) {
-    localStorage.setItem('KL' + key, val);
+    localStorage.setItem('kl_pref_' + key, val);
     kl.prefs[key].update();
     return true;
   } else {
     return false;
+  }
+};
+
+kl.loadData = function() {
+  try { //make sure saved data is good
+    var data = JSON.parse(localStorage.kl_data);
+    for (key of Object.keys(kl.dataTemplate)) {
+      kl.data[key] = data[key];
+    }
+    kl.updateAll();
+  } catch (e) { //if not, reset it
+    kl.resetData();
+  }
+};
+
+kl.saveData = function(data) {
+  if (data) { //manual save
+    localStorage.kl_data = JSON.stringify(data);
+  } else { //auto save
+    localStorage.kl_data = JSON.stringify(kl.data);
   }
 };
 
@@ -83,6 +131,8 @@ kl.init = function() {
   kl.$freq = $id('freq');
   kl.$sortFreq = $id('sortFreq');
 
+  kl.loadData();
+
   for (key of Object.keys(kl.prefs)) {
     if (!kl.prefs[key].isValid(kl.getPref(key))) {
       kl.setPref(key, kl.prefs[key].default);
@@ -90,7 +140,7 @@ kl.init = function() {
     kl.prefs[key].update();
   }
 
-  kl.$input.addEventListener('keypress', kl.handler);
+  kl.$input.addEventListener('keypress', kl.handleInput);
 };
 
 window.addEventListener('load', kl.init);
